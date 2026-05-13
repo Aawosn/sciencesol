@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biology SOL Review Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b1120;
+    --surface: #111827;
+    --surface2: #1a2540;
+    --border: #1f3058;
+    --accent: #22d3a0;
+    --accent2: #38bdf8;
+    --wrong: #f87171;
+    --wrong-bg: #2a1010;
+    --right-bg: #0a2a1c;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --tag: #1e3a5f;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Header */
+  .header {
+    width: 100%;
+    background: linear-gradient(135deg, #0b1d36 0%, #0b1120 60%);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .header-score {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--accent2);
+  }
+
+  /* Progress bar */
+  .progress-wrap {
+    width: 100%;
+    height: 4px;
+    background: var(--border);
+    position: sticky;
+    top: 57px;
+    z-index: 99;
+  }
+  .progress-bar {
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  /* Main card */
+  .container {
+    width: 100%;
+    max-width: 780px;
+    padding: 36px 24px 60px;
+  }
+
+  /* Start screen */
+  .start-screen {
+    text-align: center;
+    padding: 60px 20px;
+  }
+  .dna-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    animation: spin 10s linear infinite;
+    display: inline-block;
+  }
+  @keyframes spin {
+    0% { transform: rotateY(0deg); }
+    100% { transform: rotateY(360deg); }
+  }
+  .start-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+  }
+  .start-sub {
+    font-size: 1rem;
+    color: var(--muted);
+    margin-bottom: 32px;
+    line-height: 1.6;
+  }
+  .stats-row {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+  .stat-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 28px;
+    min-width: 130px;
+  }
+  .stat-num {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--accent);
+    font-family: 'DM Mono', monospace;
+  }
+  .stat-lbl {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 4px;
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-block;
+    padding: 14px 40px;
+    border-radius: 10px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    color: #0b1120;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(34,211,160,0.3); }
+
+  /* Question card */
+  .q-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .q-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .q-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--muted);
+    background: var(--surface2);
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+  .q-slide-tag {
+    font-size: 0.75rem;
+    color: var(--accent2);
+    background: var(--tag);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-family: 'DM Mono', monospace;
+  }
+  .q-section-tag {
+    font-size: 0.72rem;
+    color: var(--muted);
+    background: var(--surface2);
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+  .q-text {
+    font-size: 1.15rem;
+    font-weight: 600;
+    line-height: 1.55;
+    color: var(--text);
+    margin-bottom: 28px;
+  }
+
+  /* Answer options */
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .option {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: var(--surface2);
+    cursor: pointer;
+    transition: all 0.18s;
+    font-size: 0.97rem;
+    font-weight: 500;
+  }
+  .option:hover:not(.locked) {
+    border-color: var(--accent2);
+    background: #162032;
+  }
+  .option.correct {
+    border-color: var(--accent);
+    background: var(--right-bg);
+    color: #a7f3d0;
+  }
+  .option.wrong {
+    border-color: var(--wrong);
+    background: var(--wrong-bg);
+    color: #fca5a5;
+  }
+  .option.locked { cursor: default; }
+  .option-letter {
+    min-width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--muted);
+    transition: all 0.18s;
+  }
+  .option.correct .option-letter { background: var(--accent); color: #0b1120; }
+  .option.wrong .option-letter { background: var(--wrong); color: #0b1120; }
+
+  /* Feedback */
+  .feedback {
+    margin-top: 20px;
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    display: none;
+  }
+  .feedback.show { display: block; animation: fadeIn 0.2s ease; }
+  .feedback.correct-fb { background: var(--right-bg); border: 1px solid var(--accent); color: #a7f3d0; }
+  .feedback.wrong-fb { background: var(--wrong-bg); border: 1px solid var(--wrong); color: #fca5a5; }
+  .feedback-icon { font-weight: 700; margin-right: 6px; }
+
+  /* Navigation */
+  .nav-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 28px;
+    gap: 12px;
+  }
+  .btn-next {
+    display: none;
+    padding: 12px 32px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #0b1120;
+    font-weight: 700;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.95rem;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+  .btn-next.show { display: inline-block; }
+  .btn-next:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(34,211,160,0.35); }
+  .score-tally {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  .score-tally span { color: var(--accent); }
+
+  /* Results screen */
+  .results-screen {
+    text-align: center;
+    padding: 40px 20px;
+    display: none;
+  }
+  .results-screen.show { display: block; animation: fadeIn 0.5s ease; }
+  .score-circle {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    margin: 0 auto 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .score-circle svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 180px; height: 180px;
+    transform: rotate(-90deg);
+  }
+  .score-circle svg circle {
+    fill: none;
+    stroke-width: 8;
+    stroke-linecap: round;
+  }
+  .score-circle svg .track { stroke: var(--border); }
+  .score-circle svg .fill { stroke: url(#scoreGrad); stroke-dasharray: 502; stroke-dashoffset: 502; transition: stroke-dashoffset 1.5s ease; }
+  .score-inner {
+    position: relative;
+    z-index: 2;
+  }
+  .score-big {
+    font-size: 2.2rem;
+    font-weight: 700;
+    font-family: 'DM Mono', monospace;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .score-max {
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+  .result-grade {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .result-msg {
+    color: var(--muted);
+    margin-bottom: 32px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+  .result-breakdown {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin-bottom: 36px;
+    text-align: left;
+  }
+  .rb-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .rb-val {
+    font-size: 1.4rem;
+    font-weight: 700;
+    font-family: 'DM Mono', monospace;
+    color: var(--accent2);
+  }
+  .rb-lbl {
+    font-size: 0.73rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 4px;
+  }
+  .section-breakdown {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 32px;
+    text-align: left;
+  }
+  .sb-title {
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 16px;
+    font-family: 'DM Mono', monospace;
+  }
+  .sb-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+    font-size: 0.88rem;
+  }
+  .sb-label { min-width: 160px; color: var(--text); }
+  .sb-bar-wrap { flex: 1; height: 6px; background: var(--border); border-radius: 3px; }
+  .sb-bar { height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 1.2s ease; }
+  .sb-pct { min-width: 40px; text-align: right; font-family: 'DM Mono', monospace; font-size: 0.8rem; color: var(--accent); }
+
+  .btn-retry {
+    padding: 14px 40px;
+    border-radius: 10px;
+    background: var(--surface2);
+    color: var(--text);
+    font-weight: 600;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1rem;
+    cursor: pointer;
+    border: 1.5px solid var(--border);
+    transition: all 0.2s;
+    margin-right: 12px;
+  }
+  .btn-retry:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  .hidden { display: none; }
+
+  @media (max-width: 600px) {
+    .q-text { font-size: 1rem; }
+    .header { padding: 14px 16px; }
+    .container { padding: 20px 14px 50px; }
+    .q-card { padding: 22px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-title">🧬 Biology SOL Review</div>
+  <div class="header-score" id="hdrScore" style="display:none">Score: <span id="liveScore">0</span> / 600</div>
+</div>
+<div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+
+<div class="container">
+
+  <!-- START SCREEN -->
+  <div class="start-screen" id="startScreen">
+    <div class="dna-icon">🧬</div>
+    <div class="start-title">Biology SOL Review</div>
+    <div class="start-sub">Test your knowledge across all major biology topics.<br>Each correct answer earns 4 points — can you ace it?</div>
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-num">150</div><div class="stat-lbl">Questions</div></div>
+      <div class="stat-box"><div class="stat-num">600</div><div class="stat-lbl">Max Score</div></div>
+      <div class="stat-box"><div class="stat-num">9</div><div class="stat-lbl">Topics</div></div>
+    </div>
+    <button class="btn btn-primary" onclick="startQuiz()">Start Quiz →</button>
+  </div>
+
+  <!-- QUIZ SCREEN -->
+  <div id="quizScreen" class="hidden">
+    <div class="q-card" id="qCard">
+      <div class="q-meta">
+        <span class="q-num" id="qNum">Q 1 / 150</span>
+        <span class="q-slide-tag" id="qSlide">Slide 1</span>
+        <span class="q-section-tag" id="qSection"></span>
+      </div>
+      <div class="q-text" id="qText"></div>
+      <div class="options" id="optionsWrap"></div>
+      <div class="feedback" id="feedback"></div>
+      <div class="nav-row">
+        <div class="score-tally">Correct: <span id="tallyCorrect">0</span> &nbsp;|&nbsp; Wrong: <span id="tallyWrong">0</span></div>
+        <button class="btn-next" id="btnNext" onclick="nextQuestion()">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS SCREEN -->
+  <div class="results-screen" id="resultsScreen">
+    <div class="score-circle" id="scoreCircle">
+      <svg viewBox="0 0 180 180">
+        <defs>
+          <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#22d3a0"/>
+            <stop offset="100%" style="stop-color:#38bdf8"/>
+          </linearGradient>
+        </defs>
+        <circle class="track" cx="90" cy="90" r="80"/>
+        <circle class="fill" id="scoreArc" cx="90" cy="90" r="80"/>
+      </svg>
+      <div class="score-inner">
+        <div class="score-big" id="finalScore">0</div>
+        <div class="score-max">/ 600</div>
+      </div>
+    </div>
+    <div class="result-grade" id="resultGrade"></div>
+    <div class="result-msg" id="resultMsg"></div>
+    <div class="result-breakdown" id="resultBreakdown"></div>
+    <div class="section-breakdown">
+      <div class="sb-title">Performance by Topic</div>
+      <div id="sectionBars"></div>
+    </div>
+    <button class="btn-retry" onclick="restartQuiz()">↺ Try Again</button>
+    <button class="btn btn-primary" onclick="reviewMissed()">Review Missed Questions</button>
+  </div>
+
+  <!-- REVIEW SCREEN -->
+  <div id="reviewScreen" class="hidden">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+      <h2 style="font-size:1.2rem;color:var(--accent2)">📋 Missed Questions Review</h2>
+      <button class="btn-retry" onclick="showResults()">← Back to Results</button>
+    </div>
+    <div id="reviewList"></div>
+  </div>
+
+</div>
+
+<script>
+const QUESTIONS = [
+  // ── PART 1: Scientific Investigation ──────────────────────────────────────
+  { slide:1, section:"Scientific Investigation", q:"What subject is this SOL review covering?", opts:["Chemistry","Physics","Biology","Earth Science"], ans:2 },
+  { slide:2, section:"Scientific Investigation", q:"Part 1 of this review covers Scientific Investigation. Which standard does it correspond to?", opts:["BIO.2","BIO.1","BIO.4","BIO.3"], ans:1 },
+  { slide:3, section:"Scientific Investigation", q:"According to biology, all scientific inquiry begins with:", opts:["A hypothesis","A theory","An experiment","An observation"], ans:3 },
+  { slide:4, section:"Scientific Investigation", q:"Which of the following is NOT a characteristic of life?", opts:["Grows and develops","Responds to stimuli","Composed of metal","Requires energy"], ans:2 },
+  { slide:4, section:"Scientific Investigation", q:"Which characteristic of life refers to an organism maintaining constant internal conditions?", opts:["Evolves","Reproduces","Homeostasis","Responds to stimuli"], ans:2 },
+  { slide:5, section:"Scientific Investigation", q:"In the scientific method, which step comes directly AFTER forming a hypothesis?", opts:["Make an observation","Report findings","Draw conclusions","Conduct an experiment"], ans:3 },
+  { slide:5, section:"Scientific Investigation", q:"In an 'If...then...' hypothesis statement, the part after 'THEN' represents:", opts:["The control group","The dependent variable","The independent variable","A constant"], ans:1 },
+  { slide:7, section:"Scientific Investigation", q:"Why are encyclopedias generally NOT ideal for scientific research?", opts:["They are too short","They can be outdated and biased","They are peer-reviewed","They focus only on chemistry"], ans:1 },
+  { slide:7, section:"Scientific Investigation", q:"Scholarly journal articles are best described as:", opts:["Always biased","Not reviewed by experts","Peer-reviewed by experts in the field","Only published in print"], ans:2 },
+  { slide:8, section:"Scientific Investigation", q:"What is the group that remains unchanged or 'normal' in an experiment called?", opts:["Experimental group","Dependent variable","Control group","Independent variable"], ans:2 },
+  { slide:8, section:"Scientific Investigation", q:"Constants in an experiment are:", opts:["Things that change","The results you measure","Parts that remain the same for all groups","The hypothesis variables"], ans:2 },
+  { slide:9, section:"Scientific Investigation", q:"In Mrs. Dietrich's experiment, what was the independent variable?", opts:["Test scores","Number of students","Use of note cards","Number of study days"], ans:2 },
+  { slide:9, section:"Scientific Investigation", q:"In Mrs. Dietrich's experiment, Group B (no note cards) served as the:", opts:["Experimental group","Independent variable","Dependent variable","Control group"], ans:3 },
+  { slide:10, section:"Scientific Investigation", q:"A scientific _____ describes a truth that is valid everywhere in the universe.", opts:["Theory","Law","Hypothesis","Inference"], ans:1 },
+  { slide:11, section:"Scientific Investigation", q:"Which level of organization comes AFTER 'organism' but BEFORE 'community'?", opts:["Biome","Population","Ecosystem","Biosphere"], ans:1 },
+  { slide:11, section:"Scientific Investigation", q:"What is the LARGEST level of biological organization?", opts:["Biome","Ecosystem","Community","Biosphere"], ans:3 },
+
+  // ── PART 2: Biochemistry ──────────────────────────────────────────────────
+  { slide:13, section:"Biochemistry", q:"Which property of water describes it sticking to OTHER substances (not itself)?", opts:["Cohesion","High specific heat","Universal solvent","Adhesion"], ans:3 },
+  { slide:13, section:"Biochemistry", q:"Water is described as 'polar' because:", opts:["It only exists at the poles","It has slightly positive and slightly negative regions","It has no charge","It repels other molecules"], ans:1 },
+  { slide:13, section:"Biochemistry", q:"Which property of water means it resists changes in temperature?", opts:["Cohesion","Adhesion","High specific heat","Universal solvent"], ans:2 },
+  { slide:15, section:"Biochemistry", q:"What is the pH of a neutral solution?", opts:["0","7","14","3"], ans:1 },
+  { slide:15, section:"Biochemistry", q:"An acid has a pH range of:", opts:["7–14","Above 7","0–7","Exactly 7"], ans:2 },
+  { slide:16, section:"Biochemistry", q:"Which atom is considered the 'building block of life' because it forms the basis of most biological molecules?", opts:["Oxygen","Nitrogen","Hydrogen","Carbon"], ans:3 },
+  { slide:17, section:"Biochemistry", q:"What is the monomer (building block) of a carbohydrate?", opts:["Amino acid","Nucleotide","Triglyceride","Monosaccharide"], ans:3 },
+  { slide:17, section:"Biochemistry", q:"Which macromolecule has nucleotides as its monomers?", opts:["Carbohydrate","Lipid","Nucleic Acid","Protein"], ans:2 },
+  { slide:17, section:"Biochemistry", q:"Which macromolecule is responsible for long-term energy storage and makes up the cell membrane?", opts:["Carbohydrate","Lipid","Protein","Nucleic Acid"], ans:1 },
+  { slide:19, section:"Biochemistry", q:"What process forms macromolecules by combining monomers and REMOVING water?", opts:["Hydrolysis","Denaturation","Dehydration synthesis","Active transport"], ans:2 },
+  { slide:19, section:"Biochemistry", q:"What process breaks down macromolecules by ADDING water?", opts:["Dehydration synthesis","Hydrolysis","Fermentation","Denaturation"], ans:1 },
+  { slide:20, section:"Biochemistry", q:"Enzymes work by lowering which energy required for a chemical reaction to begin?", opts:["Reaction temperature","Activation energy","Product output","Bond energy"], ans:1 },
+  { slide:21, section:"Biochemistry", q:"In the lock-and-key model, where does the substrate bind to the enzyme?", opts:["The codon","The active site","The nucleus","The vacuole"], ans:1 },
+  { slide:21, section:"Biochemistry", q:"Exposure to abnormal pH or temperature can _____ an enzyme, making it non-functional.", opts:["Activate","Replicate","Denature","Merge"], ans:2 },
+
+  // ── PART 3: The Cell ─────────────────────────────────────────────────────
+  { slide:24, section:"The Cell", q:"Who coined the term 'cell' after observing cork under a microscope?", opts:["Matthias Schleiden","Theodor Schwann","Anton van Leeuwenhoek","Robert Hooke"], ans:3 },
+  { slide:24, section:"The Cell", q:"Which scientist concluded that cells come ONLY from preexisting cells?", opts:["Robert Hooke","Rudolf Virchow","Matthias Schleiden","Rosalind Franklin"], ans:1 },
+  { slide:25, section:"The Cell", q:"Why are cells so small? Because smaller cells have a:", opts:["Lower surface area to volume ratio","Larger surface area to volume ratio","Smaller nucleus","Fewer organelles"], ans:1 },
+  { slide:26, section:"The Cell", q:"Which type of cell does NOT have a nucleus or membrane-bound organelles?", opts:["Animal cell","Plant cell","Eukaryotic cell","Prokaryotic cell"], ans:3 },
+  { slide:27, section:"The Cell", q:"What is the jellylike substance inside cells that contains molecules and organelles?", opts:["Nucleus","Cytoplasm","Cell sap","Vacuole fluid"], ans:1 },
+  { slide:28, section:"The Cell", q:"The cell membrane is described as 'selectively permeable', which means:", opts:["It lets everything in","It blocks everything","It allows some but not all materials to cross","It only allows water"], ans:2 },
+  { slide:29, section:"The Cell", q:"Which cytoskeleton fiber provides cell STRENGTH?", opts:["Microtubules","Microfilaments","Intermediate filaments","Centrioles"], ans:2 },
+  { slide:30, section:"The Cell", q:"Ribosomes link amino acids together to form:", opts:["DNA","Lipids","Proteins","Carbohydrates"], ans:2 },
+  { slide:31, section:"The Cell", q:"Where is most of a eukaryotic cell's genetic information (DNA) stored?", opts:["Ribosome","Mitochondria","Nucleus","Vacuole"], ans:2 },
+  { slide:32, section:"The Cell", q:"Which type of ER is studded with ribosomes and involved in protein synthesis?", opts:["Smooth ER","Rough ER","Golgi ER","Lysosomal ER"], ans:1 },
+  { slide:33, section:"The Cell", q:"After leaving the ER, proteins are changed or packaged at the:", opts:["Lysosome","Nucleus","Ribosome","Golgi apparatus"], ans:3 },
+  { slide:34, section:"The Cell", q:"Mitochondria convert food (glucose) into usable energy in the form of:", opts:["DNA","mRNA","Starch","ATP"], ans:3 },
+  { slide:35, section:"The Cell", q:"Which organelle contains enzymes that break down damaged cell parts and is found mainly in ANIMAL cells?", opts:["Vacuole","Lysosome","Chloroplast","Ribosome"], ans:1 },
+  { slide:36, section:"The Cell", q:"Cell walls are found in all of the following EXCEPT:", opts:["Plants","Fungi","Most bacteria","Animal cells"], ans:3 },
+  { slide:37, section:"The Cell", q:"Plant cells typically contain _____ large central vacuole(s).", opts:["4","Many small ones","1","None"], ans:2 },
+  { slide:38, section:"The Cell", q:"Chloroplasts carry out which process, converting solar energy into food?", opts:["Cellular respiration","Protein synthesis","DNA replication","Photosynthesis"], ans:3 },
+  { slide:39, section:"The Cell", q:"Which THREE structures do PLANT cells have that ANIMAL cells do NOT?", opts:["Nucleus, ribosomes, mitochondria","Cell wall, chloroplast, central vacuole","Golgi, ER, lysosomes","Cell membrane, cytoplasm, nucleus"], ans:1 },
+  { slide:40, section:"The Cell", q:"In a phospholipid bilayer, the hydrophobic fatty acid tails face:", opts:["Toward water","Away from water","Toward the nucleus","Randomly in all directions"], ans:1 },
+
+  // ── PART 3b: Transport ───────────────────────────────────────────────────
+  { slide:41, section:"Transport", q:"Which type of membrane transport requires energy input from the cell?", opts:["Diffusion","Osmosis","Active transport","Facilitated diffusion"], ans:2 },
+  { slide:41, section:"Transport", q:"Endocytosis refers to moving substances:", opts:["Out of a cell","Into a cell","Across the cell wall","From nucleus to cytoplasm"], ans:1 },
+  { slide:42, section:"Transport", q:"When solute molecules are evenly distributed throughout a solution, this state is called:", opts:["Osmosis","Dynamic equilibrium","Active transport","Hypertonic balance"], ans:1 },
+  { slide:43, section:"Transport", q:"In osmosis, water moves from an area of _____ water concentration to _____ water concentration.", opts:["Low to high","Equal to unequal","High to low","High to high"], ans:2 },
+  { slide:44, section:"Transport", q:"Facilitated diffusion uses _____ to help molecules cross the membrane, but requires NO energy.", opts:["ATP","Enzymes","Transport proteins","Hormones"], ans:2 },
+  { slide:45, section:"Transport", q:"Active transport is powered by:", opts:["ADP","ATP","DNA","mRNA"], ans:1 },
+  { slide:46, section:"Transport", q:"A cell placed in an ISOTONIC solution will:", opts:["Gain water","Lose water","Show no net movement of water","Burst"], ans:2 },
+  { slide:46, section:"Transport", q:"A cell placed in a HYPERTONIC solution will:", opts:["Gain water and swell","Lose water and shrink","Stay exactly the same","Divide"], ans:1 },
+
+  // ── PART 3c: Photosynthesis & Respiration ────────────────────────────────
+  { slide:48, section:"Photosynthesis & Respiration", q:"What are the REACTANTS (inputs) in the equation for photosynthesis?", opts:["O₂ + H₂O","Light energy + CO₂ + H₂O","Glucose + O₂","ATP + CO₂"], ans:1 },
+  { slide:49, section:"Photosynthesis & Respiration", q:"Where does the LIGHT REACTION of photosynthesis occur?", opts:["Stroma","Cytoplasm","Thylakoid membranes","Mitochondria"], ans:2 },
+  { slide:49, section:"Photosynthesis & Respiration", q:"The Dark Reaction (Calvin cycle) of photosynthesis takes place in the:", opts:["Thylakoid","Nucleus","Stroma","Cytoplasm"], ans:2 },
+  { slide:50, section:"Photosynthesis & Respiration", q:"When ATP is converted to ADP, energy is:", opts:["Stored","Released","Destroyed","Transferred to DNA"], ans:1 },
+  { slide:51, section:"Photosynthesis & Respiration", q:"Cellular respiration is carried out by:", opts:["Plants only","Animals only","Plants AND animals","Bacteria only"], ans:2 },
+  { slide:52, section:"Photosynthesis & Respiration", q:"Where does GLYCOLYSIS occur in the cell?", opts:["Mitochondria","Nucleus","Cytoplasm","Chloroplast"], ans:2 },
+  { slide:52, section:"Photosynthesis & Respiration", q:"Which stage of cellular respiration produces the MOST ATP (~32–36)?", opts:["Glycolysis","Krebs cycle","Fermentation","Electron transport chain"], ans:3 },
+  { slide:54, section:"Photosynthesis & Respiration", q:"Fermentation is described as an _____ process (no oxygen required).", opts:["Aerobic","Endothermic","Anaerobic","Exothermic"], ans:2 },
+  { slide:54, section:"Photosynthesis & Respiration", q:"Which type of fermentation occurs in yeast and is key in making beer and wine?", opts:["Lactic acid fermentation","ATP fermentation","Alcohol fermentation","CO₂ fermentation"], ans:2 },
+
+  // ── PART 4: Cellular Division ────────────────────────────────────────────
+  { slide:56, section:"Cellular Division", q:"The cell cycle is a regular pattern that occurs in which type of cells?", opts:["Prokaryotic","Eukaryotic","Bacterial","Viral"], ans:1 },
+  { slide:57, section:"Cellular Division", q:"During which phase of the cell cycle does DNA copying occur?", opts:["G1","S phase","G2","M phase"], ans:1 },
+  { slide:57, section:"Cellular Division", q:"Which phase of the cell cycle is the LONGEST overall?", opts:["Mitosis (M)","G2","G1","Interphase"], ans:3 },
+  { slide:58, section:"Cellular Division", q:"During which phase of MITOSIS do chromosomes align along the cell's equator?", opts:["Prophase","Anaphase","Telophase","Metaphase"], ans:3 },
+  { slide:58, section:"Cellular Division", q:"During which phase of mitosis do chromatids SEPARATE to opposite sides?", opts:["Anaphase","Prophase","Telophase","Metaphase"], ans:0 },
+  { slide:58, section:"Cellular Division", q:"During Prophase of mitosis, what structure breaks down?", opts:["Cell membrane","Nuclear envelope","Ribosome","Golgi apparatus"], ans:1 },
+  { slide:59, section:"Cellular Division", q:"Cytokinesis is the division of the:", opts:["Nucleus","DNA","Cytoplasm","Chromosomes"], ans:2 },
+  { slide:59, section:"Cellular Division", q:"After mitosis and cytokinesis, how many daughter cells are produced?", opts:["4 haploid","1 diploid","3 diploid","2 identical diploid"], ans:3 },
+  { slide:61, section:"Cellular Division", q:"Cancer is defined as:", opts:["Controlled cell division","Uncontrolled cell growth","Viral infection of cells","Programmed cell death"], ans:1 },
+  { slide:62, section:"Cellular Division", q:"Meiosis occurs in what type of cells?", opts:["Body cells (somatic)","Muscle cells","Sex cells (gametes)","Brain cells"], ans:2 },
+  { slide:62, section:"Cellular Division", q:"How many genetically different daughter cells result from meiosis?", opts:["2 identical diploid","4 identical haploid","4 genetically different haploid","2 genetically different diploid"], ans:2 },
+  { slide:64, section:"Cellular Division", q:"What is the key difference between mitosis and meiosis in number of divisions?", opts:["Both have 2 divisions","Mitosis has 2, meiosis has 1","Mitosis has 1, meiosis has 2","Both have 1 division"], ans:2 },
+
+  // ── PART 5: DNA, RNA, Protein Synthesis ─────────────────────────────────
+  { slide:66, section:"DNA & Protein Synthesis", q:"DNA is sometimes called the 'Blueprint of Life' because it:", opts:["Has a blue color","Contains instructions for building an organism","Is found in blood","Regulates body temperature"], ans:1 },
+  { slide:67, section:"DNA & Protein Synthesis", q:"What sugar is found in DNA?", opts:["Ribose","Glucose","Fructose","Deoxyribose"], ans:3 },
+  { slide:67, section:"DNA & Protein Synthesis", q:"Which nitrogen base pairs with Adenine in DNA?", opts:["Guanine","Cytosine","Uracil","Thymine"], ans:3 },
+  { slide:67, section:"DNA & Protein Synthesis", q:"The 'sides of the ladder' in the DNA double helix are made of:", opts:["Base pairs","Amino acids","Sugar-phosphate backbone","Hydrogen bonds only"], ans:2 },
+  { slide:68, section:"DNA & Protein Synthesis", q:"Who used X-ray crystallography to discover that DNA has a helical shape?", opts:["James Watson","Rosalind Franklin","Francis Crick","Erwin Chargaff"], ans:1 },
+  { slide:68, section:"DNA & Protein Synthesis", q:"Which scientist established the base pairing rules (A pairs with T; C pairs with G)?", opts:["Hershey and Chase","Rosalind Franklin","Erwin Chargaff","James Watson"], ans:2 },
+  { slide:69, section:"DNA & Protein Synthesis", q:"Which enzyme UNZIPS the DNA molecule during replication?", opts:["RNA Polymerase","DNA Polymerase","Helicase","Ligase"], ans:2 },
+  { slide:69, section:"DNA & Protein Synthesis", q:"DNA replication is described as 'semiconservative' because:", opts:["Only half the DNA is replicated","Each new molecule has one original and one new strand","The process takes half the cell cycle","Only coding regions are copied"], ans:1 },
+  { slide:70, section:"DNA & Protein Synthesis", q:"Which of the following does NOT cause mutations?", opts:["Radiation","Chemicals","Drinking clean water","Cigarette smoke"], ans:2 },
+  { slide:71, section:"DNA & Protein Synthesis", q:"The Central Dogma of Molecular Biology describes this flow:", opts:["Protein → RNA → DNA","RNA → DNA → Protein","DNA → mRNA → Protein","mRNA → DNA → Protein"], ans:2 },
+  { slide:72, section:"DNA & Protein Synthesis", q:"What sugar does RNA contain instead of deoxyribose?", opts:["Glucose","Galactose","Fructose","Ribose"], ans:3 },
+  { slide:72, section:"DNA & Protein Synthesis", q:"RNA contains _____ instead of thymine.", opts:["Adenine","Guanine","Cytosine","Uracil"], ans:3 },
+  { slide:73, section:"DNA & Protein Synthesis", q:"Transcription (copying DNA into mRNA) occurs in the:", opts:["Cytoplasm","Ribosome","Nucleus","Mitochondria"], ans:2 },
+  { slide:73, section:"DNA & Protein Synthesis", q:"Segments of DNA that do NOT code for proteins and are 'cut out' of mRNA are called:", opts:["Exons","Histones","Introns","Codons"], ans:2 },
+  { slide:75, section:"DNA & Protein Synthesis", q:"Translation (making protein from mRNA) occurs in the cytoplasm on a:", opts:["Nucleus","Ribosome","Vacuole","Lysosome"], ans:1 },
+  { slide:75, section:"DNA & Protein Synthesis", q:"What is the three-nucleotide sequence on a tRNA molecule (complementary to the codon) called?", opts:["Codon","Anticodon","Intron","Exon"], ans:1 },
+  { slide:75, section:"DNA & Protein Synthesis", q:"Which codon STARTS translation?", opts:["UAA","UAG","UGA","AUG"], ans:3 },
+
+  // ── PART 6: Genetics ─────────────────────────────────────────────────────
+  { slide:79, section:"Genetics", q:"Who is considered the 'father of genetics'?", opts:["Charles Darwin","Carolus Linnaeus","Gregor Mendel","James Watson"], ans:2 },
+  { slide:79, section:"Genetics", q:"Alleles are best defined as:", opts:["The physical traits of an organism","Multiple versions of a gene","The complete DNA sequence","Segments that don't code for proteins"], ans:1 },
+  { slide:80, section:"Genetics", q:"A genotype with TWO DIFFERENT alleles (one dominant, one recessive) is called:", opts:["Homozygous dominant","Homozygous recessive","Heterozygous","Codominant"], ans:2 },
+  { slide:80, section:"Genetics", q:"Your physical appearance (expressed traits) is your:", opts:["Genotype","Karyotype","Phenotype","Allele set"], ans:2 },
+  { slide:81, section:"Genetics", q:"In a monohybrid cross of two heterozygous purple flowers (Pp × Pp), what is the phenotypic ratio?", opts:["1:2:1","3:1","1:1","2:1:2"], ans:1 },
+  { slide:82, section:"Genetics", q:"The Law of Independent Assortment states that:", opts:["Dominant alleles always mask recessive ones","Genes for different traits can segregate independently during meiosis","Alleles come in pairs","Only one trait can be studied at a time"], ans:1 },
+  { slide:83, section:"Genetics", q:"In incomplete dominance, the phenotype of the offspring is:", opts:["Identical to the dominant parent","Identical to the recessive parent","An intermediate blend between both parents","Randomly determined"], ans:2 },
+  { slide:83, section:"Genetics", q:"Which is a classic example of multiple alleles?", opts:["Height","Skin color","Blood type (A, B, AB, O)","Ear shape"], ans:2 },
+  { slide:84, section:"Genetics", q:"For a FEMALE to have a sex-linked recessive disease, she must have:", opts:["One recessive allele on one X","The allele on her Y chromosome","Recessive alleles on BOTH X chromosomes","A recessive allele on any autosome"], ans:2 },
+  { slide:85, section:"Genetics", q:"In a pedigree chart, a SHADED SQUARE represents:", opts:["A female carrier","An unaffected male","A male who expresses the trait","A deceased individual"], ans:2 },
+  { slide:86, section:"Genetics", q:"In a pedigree chart, a CIRCLE represents:", opts:["A male","An affected individual","A carrier","A female"], ans:3 },
+  { slide:87, section:"Genetics", q:"How many chromosomes do humans normally have in each body cell?", opts:["23","44","46","48"], ans:2 },
+  { slide:87, section:"Genetics", q:"An individual with XX sex chromosomes is:", opts:["Male","Female","Neither","Either"], ans:1 },
+  { slide:88, section:"Genetics", q:"Down Syndrome is caused by having 3 copies of chromosome number:", opts:["5","13","18","21"], ans:3 },
+  { slide:88, section:"Genetics", q:"Cri du Chat syndrome results from a deletion of part of chromosome:", opts:["21","13","5","18"], ans:2 },
+
+  // ── PART 7: Evolution ────────────────────────────────────────────────────
+  { slide:90, section:"Evolution", q:"Who is considered the 'father of evolution' and wrote On the Origin of Species?", opts:["Gregor Mendel","Carolus Linnaeus","Charles Darwin","Jean-Baptiste Lamarck"], ans:2 },
+  { slide:90, section:"Evolution", q:"Lamarck's theory of evolution was called:", opts:["Natural selection","Use and Disuse","Convergent evolution","Genetic drift"], ans:1 },
+  { slide:92, section:"Evolution", q:"Darwin referred to 'survival of the fittest' as:", opts:["Genetic drift","Artificial selection","Natural selection","The founder effect"], ans:2 },
+  { slide:92, section:"Evolution", q:"Darwin traveled to the Pacific Islands on which ship?", opts:["HMS Victory","HMS Discovery","HMS Beagle","HMS Endeavour"], ans:2 },
+  { slide:94, section:"Evolution", q:"Which type of structure performs a similar function but has a DIFFERENT evolutionary origin?", opts:["Homologous structure","Vestigial structure","Analogous structure","Fossil"], ans:2 },
+  { slide:94, section:"Evolution", q:"A structure that no longer serves its original function is called:", opts:["Analogous","Homologous","Convergent","Vestigial"], ans:3 },
+  { slide:95, section:"Evolution", q:"Which type of natural selection FAVORS THE INTERMEDIATE phenotype?", opts:["Directional selection","Disruptive selection","Stabilizing selection","Sexual selection"], ans:2 },
+  { slide:95, section:"Evolution", q:"The Bottleneck Effect and Founder Effect are both examples of:", opts:["Natural selection","Genetic drift","Directional selection","Convergent evolution"], ans:1 },
+  { slide:97, section:"Evolution", q:"Geographic isolation contributes to speciation primarily by:", opts:["Increasing gene flow between groups","Preventing two populations from mating","Combining separate gene pools","Increasing genetic variation within one population"], ans:1 },
+  { slide:98, section:"Evolution", q:"Convergent evolution leads to:", opts:["Divergent lineages","Similar characteristics in UNRELATED species","Only fossil record changes","Gradualism"], ans:1 },
+  { slide:98, section:"Evolution", q:"'Change occurs in bursts, separated by long periods of no change' describes:", opts:["Gradualism","Co-evolution","Divergent evolution","Punctuated equilibrium"], ans:3 },
+
+  // ── PART 8: Classification ───────────────────────────────────────────────
+  { slide:100, section:"Classification", q:"Binomial nomenclature uses which two parts to name organisms?", opts:["Kingdom and Phylum","Class and Order","Genus and species","Family and Genus"], ans:2 },
+  { slide:100, section:"Classification", q:"Who is considered the 'father of classification' who developed binomial nomenclature?", opts:["Gregor Mendel","Carolus Linnaeus","Charles Darwin","Carl Woese"], ans:1 },
+  { slide:102, section:"Classification", q:"What is the CORRECT order of the 7 classification levels from BROADEST to MOST SPECIFIC?", opts:["Kingdom, Phylum, Class, Order, Family, Genus, Species","Species, Genus, Family, Order, Class, Phylum, Kingdom","Phylum, Kingdom, Class, Order, Family, Genus, Species","Kingdom, Class, Phylum, Order, Family, Genus, Species"], ans:0 },
+  { slide:103, section:"Classification", q:"Which domain contains eukaryotes (including plants, animals, fungi, and protists)?", opts:["Bacteria","Archaea","Protista","Eukarya"], ans:3 },
+  { slide:103, section:"Classification", q:"Which domain contains single-celled prokaryotes known for living in EXTREME environments?", opts:["Bacteria","Eukarya","Protista","Archaea"], ans:3 },
+  { slide:104, section:"Classification", q:"Viruses consist of genetic material and a protein coat called a:", opts:["Cell membrane","Nucleus","Capsid","Cytoplasm"], ans:2 },
+  { slide:105, section:"Classification", q:"Bacteria reproduce through a process called:", opts:["Mitosis","Meiosis","Binary fission","Budding"], ans:2 },
+  { slide:106, section:"Classification", q:"Protists are eukaryotes that are NOT members of kingdoms:", opts:["Archaea only","Plantae, Animalia, or Fungi","Bacteria only","Any multicellular group"], ans:1 },
+  { slide:107, section:"Classification", q:"Fungi cell walls are made of:", opts:["Cellulose","Peptidoglycan","Chitin","Lignin"], ans:2 },
+  { slide:109, section:"Classification", q:"Which plants have FLOWERS as their reproductive structure?", opts:["Gymnosperms","Mosses","Ferns","Angiosperms"], ans:3 },
+  { slide:110, section:"Classification", q:"Which vascular tissue transports WATER in plants?", opts:["Phloem","Xylem","Lignin","Stomata"], ans:1 },
+  { slide:110, section:"Classification", q:"Tiny holes in the plant cuticle that allow gas exchange are called:", opts:["Xylem","Phloem","Stomata","Guard cells"], ans:2 },
+  { slide:112, section:"Classification", q:"The MALE reproductive organ of a flower is the:", opts:["Carpel","Sepal","Ovary","Stamen"], ans:3 },
+  { slide:112, section:"Classification", q:"Which part of the flower becomes the FRUIT?", opts:["Sepal","Petal","Ovary","Anther"], ans:2 },
+  { slide:113, section:"Classification", q:"In plant alternation of generations, the haploid stage that produces gametes is called:", opts:["Sporophyte","Gametophyte","Zygote","Spore"], ans:1 },
+  { slide:114, section:"Classification", q:"Invertebrates make up approximately what percentage of all animals?", opts:["5%","50%","75%","95%"], ans:3 },
+  { slide:115, section:"Classification", q:"Which type of body symmetry is the MOST PRIMITIVE form?", opts:["Radial symmetry","Bilateral symmetry","Asymmetry","Rotational symmetry"], ans:2 },
+  { slide:116, section:"Classification", q:"Which invertebrate phylum is characterized by jointed appendages and an exoskeleton?", opts:["Mollusca","Cnidaria","Arthropoda","Echinodermata"], ans:2 },
+  { slide:118, section:"Classification", q:"Which vertebrates are ECTOTHERMS covered with dry scales that reproduce by laying amniotic eggs?", opts:["Amphibians","Reptiles","Birds","Mammals"], ans:1 },
+  { slide:118, section:"Classification", q:"Which type of mammals lay eggs (e.g., the platypus)?", opts:["Marsupials","Placental mammals","Monotremes","Eutherian mammals"], ans:2 },
+
+  // ── PART 9: Ecology ─────────────────────────────────────────────────────
+  { slide:120, section:"Ecology", q:"A group of organisms of the SAME SPECIES living in the same location is called a:", opts:["Community","Ecosystem","Population","Biome"], ans:2 },
+  { slide:121, section:"Ecology", q:"The ROLE a species plays in its community (its total way of life) is called its:", opts:["Habitat","Niche","Biome","Ecosystem"], ans:1 },
+  { slide:121, section:"Ecology", q:"Biotic factors in an environment are the _____ parts.", opts:["Non-living","Chemical","Living","Physical"], ans:2 },
+  { slide:122, section:"Ecology", q:"The maximum population size that can be supported by available resources is called:", opts:["Biomass","Biodiversity","Carrying capacity","Limiting factor"], ans:2 },
+  { slide:123, section:"Ecology", q:"Producers (autotrophs) are found at which position in a food chain?", opts:["Top","Middle","Second trophic level","Bottom"], ans:3 },
+  { slide:124, section:"Ecology", q:"As you move UP a food chain, available energy and biomass:", opts:["Increase","Stay the same","Fluctuate unpredictably","Decrease"], ans:3 },
+  { slide:126, section:"Ecology", q:"In an ecological pyramid, which trophic level has the MOST energy?", opts:["Tertiary consumers","Secondary consumers","Primary consumers","Producers"], ans:3 },
+  { slide:127, section:"Ecology", q:"A symbiotic relationship where BOTH species benefit is called:", opts:["Commensalism","Parasitism","Competition","Mutualism"], ans:3 },
+  { slide:127, section:"Ecology", q:"Which symbiotic relationship involves one organism living on or inside another organism?", opts:["Mutualism","Commensalism","Parasitism","Competition"], ans:2 },
+  { slide:131, section:"Ecology", q:"Which type of succession occurs in an area where NO SOIL exists (e.g., bare rock)?", opts:["Secondary succession","Climax succession","Primary succession","Tertiary succession"], ans:2 },
+  { slide:131, section:"Ecology", q:"What are the PIONEER species in SECONDARY succession?", opts:["Lichens and algae","Large trees","Mainly grasses","Fungi"], ans:2 },
+  { slide:132, section:"Ecology", q:"The Chesapeake Bay is described as:", opts:["A freshwater lake","A river delta","The largest North American estuary","A saltwater biome"], ans:2 },
+  { slide:134, section:"Ecology", q:"What is ozone's function in Earth's atmosphere?", opts:["Provides oxygen for breathing","Absorbs harmful UV rays from the sun","Regulates nitrogen levels","Controls carbon dioxide concentrations"], ans:1 },
+  { slide:134, section:"Ecology", q:"Which type of resource can replenish itself over time?", opts:["Fossil fuels","Nonrenewable resource","Renewable resource","Nuclear fuel"], ans:2 },
+  { slide:135, section:"Ecology", q:"DDT undergoes 'biological magnification', meaning its concentration:", opts:["Breaks down quickly in food webs","Decreases at higher trophic levels","Stays constant throughout the food web","Increases at higher trophic levels"], ans:3 },
+];
+
+// Section colors
+const SECTION_COLORS = {
+  "Scientific Investigation": "#f59e0b",
+  "Biochemistry": "#a78bfa",
+  "The Cell": "#34d399",
+  "Transport": "#38bdf8",
+  "Photosynthesis & Respiration": "#fb923c",
+  "Cellular Division": "#f472b6",
+  "DNA & Protein Synthesis": "#818cf8",
+  "Genetics": "#4ade80",
+  "Evolution": "#facc15",
+  "Classification": "#e879f9",
+  "Ecology": "#2dd4bf",
+};
+
+// State
+let current = 0;
+let score = 0;
+let correct = 0;
+let wrong = 0;
+let answered = [];
+let missedList = [];
+let sectionStats = {};
+
+// Initialize sectionStats
+QUESTIONS.forEach(q => {
+  if (!sectionStats[q.section]) sectionStats[q.section] = { correct: 0, total: 0 };
+  sectionStats[q.section].total++;
+});
+
+function startQuiz() {
+  document.getElementById('startScreen').classList.add('hidden');
+  document.getElementById('quizScreen').classList.remove('hidden');
+  document.getElementById('hdrScore').style.display = '';
+  showQuestion();
+}
+
+function showQuestion() {
+  const q = QUESTIONS[current];
+  document.getElementById('qNum').textContent = `Q ${current + 1} / ${QUESTIONS.length}`;
+  document.getElementById('qSlide').textContent = `Slide ${q.slide}`;
+  const sec = document.getElementById('qSection');
+  sec.textContent = q.section;
+  sec.style.color = SECTION_COLORS[q.section] || 'var(--muted)';
+  sec.style.background = 'var(--surface2)';
+
+  document.getElementById('qText').textContent = q.q;
+
+  const wrap = document.getElementById('optionsWrap');
+  wrap.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  q.opts.forEach((opt, i) => {
+    const div = document.createElement('div');
+    div.className = 'option';
+    div.innerHTML = `<span class="option-letter">${letters[i]}</span><span>${opt}</span>`;
+    div.onclick = () => selectAnswer(i, div);
+    wrap.appendChild(div);
+  });
+
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('btnNext').className = 'btn-next';
+
+  const pct = (current / QUESTIONS.length) * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('liveScore').textContent = score;
+
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // Animate card
+  const card = document.getElementById('qCard');
+  card.style.animation = 'none';
+  card.offsetHeight;
+  card.style.animation = '';
+}
+
+function selectAnswer(chosen, el) {
+  const q = QUESTIONS[current];
+  const opts = document.querySelectorAll('.option');
+  opts.forEach(o => { o.classList.add('locked'); o.onclick = null; });
+
+  const fb = document.getElementById('feedback');
+  const isCorrect = chosen === q.ans;
+
+  if (isCorrect) {
+    el.classList.add('correct');
+    score += 4;
+    correct++;
+    sectionStats[q.section].correct++;
+    fb.innerHTML = `<span class="feedback-icon">✓</span> Correct! +4 points`;
+    fb.className = 'feedback show correct-fb';
+  } else {
+    el.classList.add('wrong');
+    opts[q.ans].classList.add('correct');
+    wrong++;
+    missedList.push({ q, chosen });
+    fb.innerHTML = `<span class="feedback-icon">✗</span> Incorrect. The correct answer was: <strong>${q.opts[q.ans]}</strong>`;
+    fb.className = 'feedback show wrong-fb';
+  }
+
+  answered.push({ q, chosen, correct: isCorrect });
+  document.getElementById('tallyCorrect').textContent = correct;
+  document.getElementById('tallyWrong').textContent = wrong;
+  document.getElementById('liveScore').textContent = score;
+  document.getElementById('btnNext').className = 'btn-next show';
+
+  // Update progress bar
+  const pct = ((current + 1) / QUESTIONS.length) * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+}
+
+function nextQuestion() {
+  current++;
+  if (current < QUESTIONS.length) {
+    showQuestion();
+  } else {
+    showResults();
+  }
+}
+
+function showResults() {
+  document.getElementById('quizScreen').classList.add('hidden');
+  document.getElementById('reviewScreen').classList.add('hidden');
+  const rs = document.getElementById('resultsScreen');
+  rs.classList.remove('hidden');
+  rs.classList.add('show');
+  document.getElementById('progressBar').style.width = '100%';
+
+  document.getElementById('finalScore').textContent = score;
+
+  // Arc animation
+  const pct = score / 600;
+  const circumference = 2 * Math.PI * 80; // 502.65
+  const offset = circumference * (1 - pct);
+  setTimeout(() => {
+    document.getElementById('scoreArc').style.strokeDashoffset = offset;
+  }, 200);
+
+  // Grade
+  const pctScore = (score / 600) * 100;
+  let grade, emoji, msg;
+  if (pctScore >= 90) { grade = 'A — Excellent!'; emoji = '🌟'; msg = 'Outstanding work! You have mastered Biology SOL content.'; }
+  else if (pctScore >= 80) { grade = 'B — Great job!'; emoji = '🎉'; msg = "Strong performance! Review a few topics and you'll be fully ready."; }
+  else if (pctScore >= 70) { grade = 'C — Good effort!'; emoji = '📚'; msg = 'Solid foundation. Focus on the missed questions to boost your score.'; }
+  else if (pctScore >= 60) { grade = 'D — Keep studying!'; emoji = '💪'; msg = 'You know the basics. Intensive review of the missed topics will help.'; }
+  else { grade = 'F — Study more!'; emoji = '🔬'; msg = 'Keep at it! Review the material section by section and try again.'; }
+
+  document.getElementById('resultGrade').textContent = `${emoji} ${grade}`;
+  document.getElementById('resultMsg').textContent = `${msg} (${Math.round(pctScore)}% — ${correct} correct out of ${QUESTIONS.length})`;
+
+  // Breakdown cards
+  const bd = document.getElementById('resultBreakdown');
+  bd.innerHTML = `
+    <div class="rb-card"><div class="rb-val">${score}</div><div class="rb-lbl">Score / 600</div></div>
+    <div class="rb-card"><div class="rb-val">${correct}</div><div class="rb-lbl">Correct</div></div>
+    <div class="rb-card"><div class="rb-val">${wrong}</div><div class="rb-lbl">Incorrect</div></div>
+    <div class="rb-card"><div class="rb-val">${Math.round(pctScore)}%</div><div class="rb-lbl">Percentage</div></div>
+  `;
+
+  // Section bars
+  const bars = document.getElementById('sectionBars');
+  bars.innerHTML = '';
+  Object.entries(sectionStats).forEach(([sec, data]) => {
+    const pctSec = data.total ? Math.round((data.correct / data.total) * 100) : 0;
+    const color = SECTION_COLORS[sec] || 'var(--accent)';
+    bars.innerHTML += `
+      <div class="sb-row">
+        <span class="sb-label" style="color:${color}">${sec}</span>
+        <div class="sb-bar-wrap"><div class="sb-bar" style="width:0%;background:${color}" data-w="${pctSec}"></div></div>
+        <span class="sb-pct" style="color:${color}">${pctSec}%</span>
+      </div>`;
+  });
+  setTimeout(() => {
+    document.querySelectorAll('.sb-bar').forEach(b => b.style.width = b.dataset.w + '%');
+  }, 300);
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function reviewMissed() {
+  if (missedList.length === 0) {
+    alert('No missed questions — perfect score on answered items!');
+    return;
+  }
+  document.getElementById('resultsScreen').classList.remove('show');
+  document.getElementById('resultsScreen').classList.add('hidden');
+  document.getElementById('reviewScreen').classList.remove('hidden');
+
+  const letters = ['A','B','C','D'];
+  const rl = document.getElementById('reviewList');
+  rl.innerHTML = '';
+  missedList.forEach((item, idx) => {
+    const { q, chosen } = item;
+    const div = document.createElement('div');
+    div.style.cssText = 'background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:20px;';
+    div.innerHTML = `
+      <div style="font-size:0.75rem;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:10px;">
+        Slide ${q.slide} · <span style="color:${SECTION_COLORS[q.section]||'var(--muted)'}">${q.section}</span>
+      </div>
+      <div style="font-size:1rem;font-weight:600;margin-bottom:16px;line-height:1.5;">${idx+1}. ${q.q}</div>
+      ${q.opts.map((opt,i) => {
+        let style = 'padding:10px 14px;border-radius:8px;margin-bottom:8px;display:flex;align-items:center;gap:10px;font-size:0.9rem;';
+        if (i === q.ans) style += 'background:var(--right-bg);border:1.5px solid var(--accent);color:#a7f3d0;';
+        else if (i === chosen) style += 'background:var(--wrong-bg);border:1.5px solid var(--wrong);color:#fca5a5;';
+        else style += 'background:var(--surface2);border:1.5px solid var(--border);color:var(--muted);';
+        const icon = i === q.ans ? '✓' : (i === chosen ? '✗' : '');
+        return `<div style="${style}"><span style="font-family:'DM Mono',monospace;min-width:20px;">${letters[i]}</span>${opt}${icon ? ` <span style="margin-left:auto;font-weight:700;">${icon}</span>` : ''}</div>`;
+      }).join('')}
+    `;
+    rl.appendChild(div);
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showResults() {
+  document.getElementById('quizScreen').classList.add('hidden');
+  document.getElementById('reviewScreen').classList.add('hidden');
+  const rs = document.getElementById('resultsScreen');
+  rs.classList.remove('hidden');
+  rs.classList.add('show');
+  document.getElementById('progressBar').style.width = '100%';
+
+  document.getElementById('finalScore').textContent = score;
+
+  const pct = score / 600;
+  const circumference = 2 * Math.PI * 80;
+  const offset = circumference * (1 - pct);
+  setTimeout(() => { document.getElementById('scoreArc').style.strokeDashoffset = offset; }, 200);
+
+  const pctScore = (score / 600) * 100;
+  let grade, emoji, msg;
+  if (pctScore >= 90) { grade = 'A — Excellent!'; emoji = '🌟'; msg = 'Outstanding work! You have mastered Biology SOL content.'; }
+  else if (pctScore >= 80) { grade = 'B — Great job!'; emoji = '🎉'; msg = "Strong performance! Review a few topics and you'll be fully ready."; }
+  else if (pctScore >= 70) { grade = 'C — Good effort!'; emoji = '📚'; msg = 'Solid foundation. Focus on the missed questions to boost your score.'; }
+  else if (pctScore >= 60) { grade = 'D — Keep studying!'; emoji = '💪'; msg = 'You know the basics. Intensive review of missed topics will help.'; }
+  else { grade = 'F — Study more!'; emoji = '🔬'; msg = 'Keep at it! Review the material section by section and try again.'; }
+
+  document.getElementById('resultGrade').textContent = `${emoji} ${grade}`;
+  document.getElementById('resultMsg').textContent = `${msg} (${Math.round(pctScore)}% — ${correct} correct out of ${QUESTIONS.length})`;
+
+  document.getElementById('resultBreakdown').innerHTML = `
+    <div class="rb-card"><div class="rb-val">${score}</div><div class="rb-lbl">Score / 600</div></div>
+    <div class="rb-card"><div class="rb-val">${correct}</div><div class="rb-lbl">Correct</div></div>
+    <div class="rb-card"><div class="rb-val">${wrong}</div><div class="rb-lbl">Incorrect</div></div>
+    <div class="rb-card"><div class="rb-val">${Math.round(pctScore)}%</div><div class="rb-lbl">Percentage</div></div>
+  `;
+
+  const bars = document.getElementById('sectionBars');
+  bars.innerHTML = '';
+  Object.entries(sectionStats).forEach(([sec, data]) => {
+    const pctSec = data.total ? Math.round((data.correct / data.total) * 100) : 0;
+    const color = SECTION_COLORS[sec] || 'var(--accent)';
+    bars.innerHTML += `
+      <div class="sb-row">
+        <span class="sb-label" style="color:${color}">${sec}</span>
+        <div class="sb-bar-wrap"><div class="sb-bar" style="width:0%;background:${color}" data-w="${pctSec}"></div></div>
+        <span class="sb-pct" style="color:${color}">${pctSec}%</span>
+      </div>`;
+  });
+  setTimeout(() => {
+    document.querySelectorAll('.sb-bar').forEach(b => b.style.width = b.dataset.w + '%');
+  }, 300);
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function restartQuiz() {
+  current = 0; score = 0; correct = 0; wrong = 0;
+  answered = []; missedList = [];
+  Object.keys(sectionStats).forEach(k => { sectionStats[k].correct = 0; });
+  document.getElementById('resultsScreen').classList.remove('show');
+  document.getElementById('resultsScreen').classList.add('hidden');
+  document.getElementById('liveScore').textContent = 0;
+  document.getElementById('tallyCorrect').textContent = 0;
+  document.getElementById('tallyWrong').textContent = 0;
+  document.getElementById('quizScreen').classList.remove('hidden');
+  document.getElementById('progressBar').style.width = '0%';
+  showQuestion();
+}
+</script>
+</body>
+</html>
